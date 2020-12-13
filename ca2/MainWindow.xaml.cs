@@ -30,8 +30,8 @@ namespace ca2
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            employees.Add(new FullTimeEmployee { FirstName = "Jess", Surname = "Walsh", Salary = 10.00m });
-            employees.Add(new FullTimeEmployee { FirstName = "Joe", Surname = "Murphy", Salary = 20.00m });
+            employees.Add(new FullTimeEmployee { FirstName = "Jess", Surname = "Walsh", Salary = 30000.00m });
+            employees.Add(new FullTimeEmployee { FirstName = "Joe", Surname = "Murphy", Salary = 50000.00m });
             employees.Add(new PartTimeEmployee { FirstName = "John", Surname = "Smith", HourlyRate = 15.00m, HoursWorked = 20 });
             employees.Add(new PartTimeEmployee { FirstName = "Jane", Surname = "Jones", HourlyRate = 11.00m, HoursWorked = 40 });
 
@@ -73,6 +73,40 @@ namespace ca2
         private void Tcheck_(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void LbxEmployees_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            btnClear_Click(sender, e);
+
+            Employee SelectedEmployee = LbxEmployees.SelectedItem as Employee;
+
+            if (SelectedEmployee != null)
+            {
+                tbxFirstName.Text = SelectedEmployee.FirstName;
+                tbxSurname.Text = SelectedEmployee.Surname;
+                if (SelectedEmployee is FullTimeEmployee)
+                {
+                    tbxSalary.Text = (SelectedEmployee as FullTimeEmployee).Salary.ToString();
+                }
+                else if (SelectedEmployee is PartTimeEmployee)
+                {
+                    tbxHourlyRate.Text = (SelectedEmployee as PartTimeEmployee).HourlyRate.ToString();
+                    tbxHoursWorked.Text = (SelectedEmployee as PartTimeEmployee).HoursWorked.ToString();
+                }
+
+                tbkMonthlyPay.Text = String.Format("{0:0.00}", SelectedEmployee.CalculateMonthlyPay());
+            }
+        }
+
+        private void btnClear_Click(object sender, RoutedEventArgs e)
+        {
+            tbxFirstName.Text = "";
+            tbxSurname.Text = "";
+            tbxSalary.Text = "";
+            tbxHourlyRate.Text = "";
+            tbxHoursWorked.Text = "";
+            tbkMonthlyPay.Text = "";
         }
     }
 }
