@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+
 
 namespace ca2
 {
@@ -35,11 +37,106 @@ namespace ca2
             employees.Add(new PartTimeEmployee { FirstName = "John", Surname = "Smith", HourlyRate = 15.00m, HoursWorked = 20 });
             employees.Add(new PartTimeEmployee { FirstName = "Jane", Surname = "Jones", HourlyRate = 11.00m, HoursWorked = 40 });
 
+            employees.Sort();
             LbxEmployees.ItemsSource = employees;
         }
 
         private void Tcheck_Checked(object sender, RoutedEventArgs e)
         {
+            RefreshList();
+        }
+
+        private void LbxEmployees_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            btnClear_Click(sender, e);
+
+            Employee SelectedEmployee = LbxEmployees.SelectedItem as Employee;
+
+            if (SelectedEmployee != null)
+            {
+                tbxFirstName.Text = SelectedEmployee.FirstName;
+                tbxSurname.Text = SelectedEmployee.Surname;
+                if (SelectedEmployee is FullTimeEmployee)
+                {
+                    tbxSalary.Text = (SelectedEmployee as FullTimeEmployee).Salary.ToString();
+
+                    FTradio.IsChecked = true;
+                }
+                else if (SelectedEmployee is PartTimeEmployee)
+                {
+                    PartTimeEmployee PTtmp = SelectedEmployee as PartTimeEmployee;
+
+                    tbxHourlyRate.Text = PTtmp.HourlyRate.ToString();
+                    tbxHoursWorked.Text = PTtmp.HoursWorked.ToString();
+
+                    PTradio.IsChecked = true;
+                }
+
+                tbkMonthlyPay.Text = String.Format("{0:0.00}", SelectedEmployee.CalculateMonthlyPay());
+            }
+        }
+
+        private void btnClear_Click(object sender, RoutedEventArgs e)
+        {
+            tbxFirstName.Text = "";
+            tbxSurname.Text = "";
+            tbxSalary.Text = "";
+            tbxHourlyRate.Text = "";
+            tbxHoursWorked.Text = "";
+            tbkMonthlyPay.Text = "";
+        }
+
+        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            if ((Boolean)FTradio.IsChecked)
+            {
+                FullTimeEmployee emp = new FullTimeEmployee();
+                emp.FirstName = tbxFirstName.Text;
+                emp.Surname = tbxSurname.Text;
+                decimal salary = 0;
+                if (decimal.TryParse(tbxSalary.Text, out salary))
+                {
+                    emp.Salary = salary;
+
+                    employees.Add(emp);
+                }
+                else
+                {
+                    tbkMsg.Text = "Salary is not valid";
+                }
+            }
+            else if ((Boolean)PTradio.IsChecked)
+            {
+
+                PartTimeEmployee emp = new PartTimeEmployee();
+                emp.FirstName = tbxFirstName.Text;
+                emp.Surname = tbxSurname.Text;
+                decimal hourlyrate = 0;
+                double hoursworked = 0;
+                if (decimal.TryParse(tbxHourlyRate.Text, out hourlyrate) && double.TryParse(tbxHourlyRate.Text, out hoursworked))
+                {
+                    emp.HourlyRate = hourlyrate;
+                    emp.HoursWorked = hoursworked;
+
+                    employees.Add(emp);
+                }
+                else
+                {
+                    tbkMsg.Text = "Hourly rate and hours worked but be numbers";
+                }
+            }    
+            else
+            {
+                tbkMsg.Text = "A part time or full time option must be selected";
+            }
+
+            RefreshList();
+        }
+
+        private void RefreshList()
+        {
+            employees.Sort();
+
             FilteredEmployees.Clear();
             LbxEmployees.ItemsSource = null;
 
@@ -70,43 +167,21 @@ namespace ca2
             }
         }
 
-        private void Tcheck_(object sender, RoutedEventArgs e)
+        private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
-
-        }
-
-        private void LbxEmployees_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            btnClear_Click(sender, e);
 
             Employee SelectedEmployee = LbxEmployees.SelectedItem as Employee;
 
             if (SelectedEmployee != null)
             {
-                tbxFirstName.Text = SelectedEmployee.FirstName;
-                tbxSurname.Text = SelectedEmployee.Surname;
-                if (SelectedEmployee is FullTimeEmployee)
-                {
-                    tbxSalary.Text = (SelectedEmployee as FullTimeEmployee).Salary.ToString();
-                }
-                else if (SelectedEmployee is PartTimeEmployee)
-                {
-                    tbxHourlyRate.Text = (SelectedEmployee as PartTimeEmployee).HourlyRate.ToString();
-                    tbxHoursWorked.Text = (SelectedEmployee as PartTimeEmployee).HoursWorked.ToString();
-                }
+                employees.Remove(SelectedEmployee);
 
-                tbkMonthlyPay.Text = String.Format("{0:0.00}", SelectedEmployee.CalculateMonthlyPay());
+                RefreshList();
             }
-        }
-
-        private void btnClear_Click(object sender, RoutedEventArgs e)
-        {
-            tbxFirstName.Text = "";
-            tbxSurname.Text = "";
-            tbxSalary.Text = "";
-            tbxHourlyRate.Text = "";
-            tbxHoursWorked.Text = "";
-            tbkMonthlyPay.Text = "";
+            else
+            {
+                tbkMsg.Text = "Select an employee to delete";
+            }
         }
     }
 }
