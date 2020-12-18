@@ -36,10 +36,10 @@ namespace ca2
             // When the window loads, add some employee objects to the employees list. Sort it, set listbox source, check boxes
 
             // Making some basic employee classes
-            employees.Add(new FullTimeEmployee { FirstName = "Jess", Surname = "Walsh", Salary = 30000.00m });
-            employees.Add(new FullTimeEmployee { FirstName = "Joe", Surname = "Murphy", Salary = 50000.00m });
-            employees.Add(new PartTimeEmployee { FirstName = "John", Surname = "Smith", HourlyRate = 15.00m, HoursWorked = 20 });
-            employees.Add(new PartTimeEmployee { FirstName = "Jane", Surname = "Jones", HourlyRate = 11.00m, HoursWorked = 40 });
+            employees.Add(new FullTimeEmployee("Jess", "Walsh", 30000.00m));
+            employees.Add(new FullTimeEmployee ("Joe", "Murphy", 50000.00m));
+            employees.Add(new PartTimeEmployee ("John", "Smith", 15.00m, 20));
+            employees.Add(new PartTimeEmployee ("Jane", "Jones", 11.00m, 40));
 
             // Sort the employees, then set the source of the listbox to the employees list
             employees.Sort();
@@ -68,9 +68,6 @@ namespace ca2
 
             // Clears the info
             ClearInfo();
-
-            // Sets message box to empty
-            tbkMsg.Text = "";
 
             // Sets the employee selected to geneiric employee class
             Employee SelectedEmployee = LbxEmployees.SelectedItem as Employee;
@@ -124,16 +121,12 @@ namespace ca2
             // If the FT radio is checked, create a fulltime employee, otherwise part time
             if ((Boolean)FTradio.IsChecked)
             {
-                FullTimeEmployee emp = new FullTimeEmployee();
-                emp.FirstName = tbxFirstName.Text;
-                emp.Surname = tbxSurname.Text;
                 decimal salary = 0;
                 
                 // Attmpy to get salary, if it's not valid, display error msg
                 if (decimal.TryParse(tbxSalary.Text, out salary))
                 {
-                    emp.Salary = salary;
-
+                    FullTimeEmployee emp = new FullTimeEmployee(tbxFirstName.Text, tbxSurname.Text, salary);
                     employees.Add(emp);
                 }
                 else
@@ -143,24 +136,19 @@ namespace ca2
             }
             else if ((Boolean)PTradio.IsChecked)
             {
-                // Make a new part time employee, set the names to it
-                PartTimeEmployee emp = new PartTimeEmployee();
-                emp.FirstName = tbxFirstName.Text;
-                emp.Surname = tbxSurname.Text;
                 decimal hourlyrate = 0;
                 double hoursworked = 0;
 
                 // If the hourly rate and works worked are not valid, display error msg
                 if (decimal.TryParse(tbxHourlyRate.Text, out hourlyrate) && double.TryParse(tbxHourlyRate.Text, out hoursworked))
                 {
-                    emp.HourlyRate = hourlyrate;
-                    emp.HoursWorked = hoursworked;
-
+                    // Make a new part time employee with the constuctors
+                    PartTimeEmployee emp = new PartTimeEmployee(tbxFirstName.Text, tbxSurname.Text, hourlyrate, hoursworked);
                     employees.Add(emp);
                 }
                 else
                 {
-                    tbkMsg.Text = "Hourly rate and hours worked but be numbers";
+                    tbkMsg.Text = "Hourly rate and hours worked must be numbers";
                 }
             }    
             else
@@ -206,7 +194,6 @@ namespace ca2
             // Get the selected employee
             Employee SelectedEmployee = LbxEmployees.SelectedItem as Employee;
 
-
             if (SelectedEmployee != null)
             {
                 // If the employee is full time, try to get and set salary to the one in the textbox
@@ -217,15 +204,37 @@ namespace ca2
                     decimal salary = 0;
 
                     // Try to get salary. On success, set values to employee obj
-                    if (decimal.TryParse(tbxSalary.Text, out salary))
+                    if ((Boolean)FTradio.IsChecked)
                     {
-                        FTemp.FirstName = tbxFirstName.Text;
-                        FTemp.Surname = tbxSurname.Text;
-                        FTemp.Salary = salary;
+                        if (decimal.TryParse(tbxSalary.Text, out salary))
+                        {
+                            FTemp.FirstName = tbxFirstName.Text;
+                            FTemp.Surname = tbxSurname.Text;
+                            FTemp.Salary = salary;
+                        }
+                        else
+                        {
+                            tbkMsg.Text = "Salary is not valid";
+                        }
                     }
                     else
                     {
-                        tbkMsg.Text = "Salary is not valid";
+                        decimal hourlyrate = 0;
+                        double hoursworked = 0;
+
+                        // If the hourly rate and works worked are not valid, display error msg
+                        if (decimal.TryParse(tbxHourlyRate.Text, out hourlyrate) && double.TryParse(tbxHoursWorked.Text, out hoursworked))
+                        {
+                            // Make a new part time employee with the constuctors
+                            employees.Remove(SelectedEmployee);
+
+                            PartTimeEmployee emp = new PartTimeEmployee(tbxFirstName.Text, tbxSurname.Text, hourlyrate, hoursworked);
+                            employees.Add(emp);
+                        }
+                        else
+                        {
+                            tbkMsg.Text = "Hourly rate and hours worked must be numbers";
+                        }
                     }
                 }
                 else if (SelectedEmployee is PartTimeEmployee)
@@ -237,16 +246,36 @@ namespace ca2
                     double hoursworked = 0;
 
                     // Try to get the hourlyrate and hours worked. If successful, set them to the employee
-                    if (decimal.TryParse(tbxHourlyRate.Text, out hourlyrate) && double.TryParse(tbxHourlyRate.Text, out hoursworked))
+                    if ((Boolean)PTradio.IsChecked)
                     {
-                        PTemp.FirstName = tbxFirstName.Text;
-                        PTemp.Surname = tbxSurname.Text;
-                        PTemp.HourlyRate = hourlyrate;
-                        PTemp.HoursWorked = hoursworked;
+                        if (decimal.TryParse(tbxHourlyRate.Text, out hourlyrate) && double.TryParse(tbxHoursWorked.Text, out hoursworked))
+                        {
+                            PTemp.FirstName = tbxFirstName.Text;
+                            PTemp.Surname = tbxSurname.Text;
+                            PTemp.HourlyRate = hourlyrate;
+                            PTemp.HoursWorked = hoursworked;
+                        }
+                        else
+                        {
+                            tbkMsg.Text = "Hourly rate and hours worked not valid";
+                        }
                     }
                     else
                     {
-                        tbkMsg.Text = "Hourly rate and hours worked not valid";
+                        decimal salary = 0;
+
+                        // Attmpy to get salary, if it's not valid, display error msg
+                        if (decimal.TryParse(tbxSalary.Text, out salary))
+                        {
+                            employees.Remove(SelectedEmployee);
+
+                            FullTimeEmployee emp = new FullTimeEmployee(tbxFirstName.Text, tbxSurname.Text, salary);
+                            employees.Add(emp);
+                        }
+                        else
+                        {
+                            tbkMsg.Text = "Salary is not valid";
+                        }
                     }
                 }
                 else

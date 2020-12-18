@@ -10,6 +10,17 @@ namespace ca2
     {
         public decimal Salary { get; set; }
 
+        public FullTimeEmployee() : this("none", "none", 0) { }
+
+        public FullTimeEmployee(string firstname, string surname) : this(firstname, surname, 0) { }
+
+        public FullTimeEmployee(string firstname, string surname, decimal salary)
+        {
+            FirstName = firstname;
+            Surname = surname;
+            Salary = salary;
+        }
+
         public override decimal CalculateMonthlyPay()
         {
             return Salary / 12;
