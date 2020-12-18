@@ -189,23 +189,24 @@ namespace ca2
         {
             // Updates a selected employee object with info entered into the boxes.
             // Only updates if the info is valid
-            // Does not allow you to change a part time employee to a full time and vice-versa
+            // If you are changing an employees part/full time status, it make a new object and deletes the selected
 
             // Get the selected employee
             Employee SelectedEmployee = LbxEmployees.SelectedItem as Employee;
 
+            // If the employee exists
             if (SelectedEmployee != null)
             {
                 // If the employee is full time, try to get and set salary to the one in the textbox
                 if (SelectedEmployee is FullTimeEmployee)
                 {
-                    FullTimeEmployee FTemp = SelectedEmployee as FullTimeEmployee;
-
-                    decimal salary = 0;
-
-                    // Try to get salary. On success, set values to employee obj
+                    // If the full time radio button is checked and the employee is fulltime, just change the values
                     if ((Boolean)FTradio.IsChecked)
                     {
+                        FullTimeEmployee FTemp = SelectedEmployee as FullTimeEmployee;
+
+                        decimal salary = 0;
+
                         if (decimal.TryParse(tbxSalary.Text, out salary))
                         {
                             FTemp.FirstName = tbxFirstName.Text;
@@ -217,6 +218,7 @@ namespace ca2
                             tbkMsg.Text = "Salary is not valid";
                         }
                     }
+                    // If the part time button is checked, then make a new employee obj to replace the old one
                     else
                     {
                         decimal hourlyrate = 0;
@@ -239,15 +241,18 @@ namespace ca2
                 }
                 else if (SelectedEmployee is PartTimeEmployee)
                 {
-                    // Casting the selected employee to part time
-                    PartTimeEmployee PTemp = SelectedEmployee as PartTimeEmployee;
-
-                    decimal hourlyrate = 0;
-                    double hoursworked = 0;
-
-                    // Try to get the hourlyrate and hours worked. If successful, set them to the employee
+                    // If the part time radio button is checked and the employee is part time
+                    // then parse the hourlyrate and hoursworked, and change the values of the partime
+                    // employee obj
                     if ((Boolean)PTradio.IsChecked)
                     {
+                        // Casting the selected employee to part time
+                        PartTimeEmployee PTemp = SelectedEmployee as PartTimeEmployee;
+
+                        decimal hourlyrate = 0;
+                        double hoursworked = 0;
+
+                        // Try to get the hourlyrate and hours worked. If successful, set them to the employee
                         if (decimal.TryParse(tbxHourlyRate.Text, out hourlyrate) && double.TryParse(tbxHoursWorked.Text, out hoursworked))
                         {
                             PTemp.FirstName = tbxFirstName.Text;
@@ -260,6 +265,8 @@ namespace ca2
                             tbkMsg.Text = "Hourly rate and hours worked not valid";
                         }
                     }
+                    // If the ft radio button is checked, make a new fulltimeemployee class
+                    // and then append to the list, and remove the previous employee class
                     else
                     {
                         decimal salary = 0;
@@ -282,9 +289,6 @@ namespace ca2
                 {
                     tbkMsg.Text = "Select an employee to update";
                 }
-
-                // Get the new monthly pay
-                tbkMonthlyPay.Text = String.Format("{0:0.00}", SelectedEmployee.CalculateMonthlyPay());
             }
             else
             {
